@@ -56,9 +56,11 @@ std::shared_ptr<grpc::Channel> CreateCustomChannelWithInterceptors(
         interceptor_creators);
 }  // namespace experimental
 
+#ifndef GRPC_NO_XDS
 /// Builds XDS Credentials.
 std::shared_ptr<ChannelCredentials> XdsCredentials(
     const std::shared_ptr<ChannelCredentials>& fallback_creds);
+#endif
 
 /// A channel credentials object encapsulates all the state needed by a client
 /// to authenticate with a server for a given channel.
@@ -76,12 +78,14 @@ class ChannelCredentials : private grpc::GrpcLibraryCodegen {
       const std::shared_ptr<ChannelCredentials>& channel_creds,
       const std::shared_ptr<CallCredentials>& call_creds);
 
+#ifndef GRPC_NO_XDS
   // TODO(yashykt): We need this friend declaration mainly for access to
   // AsSecureCredentials(). Once we are able to remove insecure builds from gRPC
   // (and also internal dependencies on the indirect method of creating a
   // channel through credentials), we would be able to remove this.
   friend std::shared_ptr<ChannelCredentials> grpc::XdsCredentials(
       const std::shared_ptr<ChannelCredentials>& fallback_creds);
+#endif
 
   virtual SecureChannelCredentials* AsSecureCredentials() = 0;
 

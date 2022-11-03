@@ -286,6 +286,7 @@ class ServerContextBase {
   /// Applications never need to call this method.
   grpc_call* c_call() { return call_.call; }
 
+#ifndef GRPC_NO_XDS
   /// Get the \a CallMetricRecorder object for the current RPC.
   /// Use it to record metrics during your RPC to send back to the
   /// client in order to make load balancing decisions. This will
@@ -294,6 +295,7 @@ class ServerContextBase {
   experimental::CallMetricRecorder* ExperimentalGetCallMetricRecorder() {
     return call_metric_recorder_;
   }
+#endif
 
   /// EXPERIMENTAL API
   /// Returns the call's authority.
@@ -446,7 +448,9 @@ class ServerContextBase {
     }
   }
 
+#ifndef GRPC_NO_XDS
   void CreateCallMetricRecorder();
+#endif
 
   struct CallWrapper {
     ~CallWrapper();
@@ -485,7 +489,9 @@ class ServerContextBase {
   grpc::experimental::ServerRpcInfo* rpc_info_ = nullptr;
   RpcAllocatorState* message_allocator_state_ = nullptr;
   ContextAllocator* context_allocator_ = nullptr;
+#ifndef GRPC_NO_XDS
   experimental::CallMetricRecorder* call_metric_recorder_ = nullptr;
+#endif
 
   class Reactor : public grpc::ServerUnaryReactor {
    public:

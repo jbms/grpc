@@ -40,7 +40,6 @@
 #include <grpc/support/log.h>
 #include <grpc/support/time.h>
 #include <grpcpp/completion_queue.h>
-#include <grpcpp/ext/call_metric_recorder.h>
 #include <grpcpp/impl/call.h>
 #include <grpcpp/impl/call_op_set.h>
 #include <grpcpp/impl/call_op_set_interface.h>
@@ -55,6 +54,10 @@
 #include <grpcpp/support/server_callback.h>
 #include <grpcpp/support/server_interceptor.h>
 #include <grpcpp/support/string_ref.h>
+
+#ifndef GRPC_NO_XDS
+#include <grpcpp/ext/call_metric_recorder.h>
+#endif
 
 #include "src/core/lib/gprpp/ref_counted.h"
 #include "src/core/lib/gprpp/sync.h"
@@ -288,9 +291,11 @@ ServerContextBase::~ServerContextBase() {
   if (default_reactor_used_.load(std::memory_order_relaxed)) {
     reinterpret_cast<Reactor*>(&default_reactor_)->~Reactor();
   }
+#ifndef GRPC_NO_XDS
   if (call_metric_recorder_ != nullptr) {
     call_metric_recorder_->~CallMetricRecorder();
   }
+#endif
 }
 
 ServerContextBase::CallWrapper::~CallWrapper() {
@@ -404,11 +409,13 @@ void ServerContextBase::SetLoadReportingCosts(
   }
 }
 
+#ifndef GRPC_NO_XDS
 void ServerContextBase::CreateCallMetricRecorder() {
   GPR_ASSERT(call_metric_recorder_ == nullptr);
   grpc_core::Arena* arena = grpc_call_get_arena(call_.call);
   call_metric_recorder_ = arena->New<experimental::CallMetricRecorder>(arena);
 }
+#endif
 
 grpc::string_ref ServerContextBase::ExperimentalGetAuthority() const {
   absl::string_view authority = grpc_call_server_authority(call_.call);

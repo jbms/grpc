@@ -1758,7 +1758,6 @@ grpc_cc_library(
         "grpc_security_base",
         "grpc_service_config_impl",
         "grpc_trace",
-        "grpcpp_call_metric_recorder",
         "iomgr_timer",
         "ref_counted_ptr",
         "//src/core:arena",
@@ -1782,7 +1781,10 @@ grpc_cc_library(
         "//src/core:thread_quota",
         "//src/core:time",
         "//src/core:useful",
-    ],
+    ] + select({
+        "grpc_no_xds": [],
+        "//conditions:default": ["grpcpp_call_metric_recorder"],
+    }),
 )
 
 # TODO(chengyuc): Give it another try to merge this to `grpc++_base` after
@@ -1818,7 +1820,6 @@ grpc_cc_library(
         "grpc_service_config_impl",
         "grpc_trace",
         "grpc_unsecure",
-        "grpcpp_call_metric_recorder",
         "iomgr_timer",
         "ref_counted_ptr",
         "//src/core:arena",
@@ -1833,7 +1834,10 @@ grpc_cc_library(
         "//src/core:slice",
         "//src/core:time",
         "//src/core:useful",
-    ],
+    ] + select({
+        "grpc_no_xds": [],
+        "//conditions:default": ["grpcpp_call_metric_recorder"],
+    }),
 )
 
 grpc_cc_library(
@@ -2602,7 +2606,6 @@ grpc_cc_library(
         "//src/core:ext/filters/client_channel/health/health_check_client.cc",
         "//src/core:ext/filters/client_channel/http_proxy.cc",
         "//src/core:ext/filters/client_channel/lb_policy/child_policy_handler.cc",
-        "//src/core:ext/filters/client_channel/lb_policy/oob_backend_metric.cc",
         "//src/core:ext/filters/client_channel/local_subchannel_pool.cc",
         "//src/core:ext/filters/client_channel/retry_filter.cc",
         "//src/core:ext/filters/client_channel/retry_service_config.cc",
@@ -2611,7 +2614,12 @@ grpc_cc_library(
         "//src/core:ext/filters/client_channel/subchannel.cc",
         "//src/core:ext/filters/client_channel/subchannel_pool_interface.cc",
         "//src/core:ext/filters/client_channel/subchannel_stream_client.cc",
-    ],
+    ] + select({
+        "grpc_no_xds": [],
+        "//conditions:default": [
+            "//src/core:ext/filters/client_channel/lb_policy/oob_backend_metric.cc",
+        ],
+    }),
     hdrs = [
         "//src/core:ext/filters/client_channel/backend_metric.h",
         "//src/core:ext/filters/client_channel/backup_poller.h",
@@ -2626,7 +2634,6 @@ grpc_cc_library(
         "//src/core:ext/filters/client_channel/health/health_check_client.h",
         "//src/core:ext/filters/client_channel/http_proxy.h",
         "//src/core:ext/filters/client_channel/lb_policy/child_policy_handler.h",
-        "//src/core:ext/filters/client_channel/lb_policy/oob_backend_metric.h",
         "//src/core:ext/filters/client_channel/local_subchannel_pool.h",
         "//src/core:ext/filters/client_channel/retry_filter.h",
         "//src/core:ext/filters/client_channel/retry_service_config.h",
@@ -2635,7 +2642,16 @@ grpc_cc_library(
         "//src/core:ext/filters/client_channel/subchannel_interface_internal.h",
         "//src/core:ext/filters/client_channel/subchannel_pool_interface.h",
         "//src/core:ext/filters/client_channel/subchannel_stream_client.h",
-    ],
+    ] + select({
+        "grpc_no_xds": [],
+        "//conditions:default": [
+            "//src/core:ext/filters/client_channel/lb_policy/oob_backend_metric.h",
+        ],
+    }),
+    defines = select({
+        "grpc_no_xds": ["GRPC_NO_XDS"],
+        "//conditions:default": [],
+    }),
     external_deps = [
         "absl/base:core_headers",
         "absl/container:inlined_vector",
@@ -2670,8 +2686,6 @@ grpc_cc_library(
         "stats",
         "uri_parser",
         "work_serializer",
-        "xds_orca_service_upb",
-        "xds_orca_upb",
         "//src/core:arena",
         "//src/core:channel_fwd",
         "//src/core:channel_init",
@@ -2710,7 +2724,13 @@ grpc_cc_library(
         "//src/core:unique_type_name",
         "//src/core:useful",
         "//src/core:validation_errors",
-    ],
+    ] + select({
+        "grpc_no_xds": [],
+        "//conditions:default": [
+            "xds_orca_service_upb",
+            "xds_orca_upb",
+        ],
+    }),
 )
 
 grpc_cc_library(
